@@ -66,7 +66,7 @@ while True:
     opponent_x, opponent_y = [int(i) for i in input().split()]
 
     if next_checkpoint_angle > 90 or next_checkpoint_angle < -90 or \
-        (next_checkpoint_dist <= 3000 and (next_checkpoint_angle > 45 or next_checkpoint_angle < -45)):
+        (next_checkpoint_dist <= 4000 and (next_checkpoint_angle > 45 or next_checkpoint_angle < -45)):
         empuje = 0
     elif not boost_usado and next_checkpoint_dist >= 300:
         empuje = "BOOST"
