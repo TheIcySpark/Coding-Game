@@ -66,11 +66,11 @@ while True:
     opponent_x, opponent_y = [int(i) for i in input().split()]
 
     if next_checkpoint_angle > 90 or next_checkpoint_angle < -90 or \
-        (next_checkpoint_dist <= 2000 and \
+        (next_checkpoint_dist <= 4000 and \
         (next_checkpoint_angle > 45 or next_checkpoint_angle < -45)):
         empuje = 0
 
-    elif not boost_usado and next_checkpoint_dist >= 4000 and \
+    elif not boost_usado and next_checkpoint_dist >= 3500 and \
     (next_checkpoint_angle < 30 and next_checkpoint_angle > -30):
         empuje = "BOOST"
         boost_usado = True
@@ -81,7 +81,7 @@ while True:
         next_checkpoint_x += int(vector_suma.x)
         next_checkpoint_y += int(vector_suma.y)
         if (int(vector_suma.x != 0) and int(vector_suma.y != 0)) and \
-        next_checkpoint_dist <= 500:
+        next_checkpoint_dist <= 1000:
             empuje = "SHIELD"
 
     print(str(next_checkpoint_x) + " " + str(next_checkpoint_y) + " " + str(empuje))
