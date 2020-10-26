@@ -36,7 +36,7 @@ void inicializar(){
 void mostrar_camino(){
     for(int i = 1; i <= alto; i++){
         for(int j = 1; j <= ancho; j++){
-            cout << caminos[i][j]<<h_utilizados[i][j];
+            cout << caminos[i][j];
         }
         cout << '\n';
     }
@@ -51,7 +51,8 @@ bool direccion_viable(int arriba, int derecha, Pelota pelota){
         (mapa[pelota.f][pelota.c] == 'H' and pelota.conteo_golpes > 0) or
         (pelota.conteo_golpes == 0 and mapa[pelota.f][pelota.c] == 'X') or
         caminos[pelota.f][pelota.c] != '.' or
-        (mapa[pelota.f][pelota.c] >= '0' and mapa[pelota.f][pelota.c] <= '9')){
+        (mapa[pelota.f][pelota.c] >= '0' and mapa[pelota.f][pelota.c] <= '9') or
+        (mapa[pelota.f][pelota.c] == 'H' and pelota.conteo_golpes == 0 and h_utilizados[pelota.f][pelota.c])){
             return false;
         }
     }
@@ -75,39 +76,29 @@ Pelota marcar_camino(int arriba, int derecha, Pelota pelota, char simbolo){
 
 bool backtracking(char direccion, int numero_pelota, Pelota pelota){
     int arriba = 0, derecha = 0;
-    if(direccion == '^'){
-        arriba = -1;
-    }else if(direccion == '>'){
-        derecha = 1;
-    }else if(direccion == 'v'){
-        arriba = 1;
-    }else if(direccion == '<'){
-        derecha = -1;
-    }
-    if(numero_pelota == 3){
-        cout<<direccion_viable(arriba, derecha, pelota)<<'\n';
-        mostrar_camino();
-    }
+    if(direccion == '^') arriba = -1;
+    else if(direccion == '>') derecha = 1;
+    else if(direccion == 'v') arriba = 1;
+    else if(direccion == '<') derecha = -1;
+    
     if(!direccion_viable(arriba, derecha, pelota)) return false;
     Pelota nueva_pelota = marcar_camino(arriba, derecha, pelota, direccion);
+    Pelota pelota_siguiente = nueva_pelota;
     if(mapa[nueva_pelota.f][nueva_pelota.c] == 'H'){
-        if(!h_utilizados[nueva_pelota.f][nueva_pelota.c]){
-            h_utilizados[nueva_pelota.f][nueva_pelota.c] = true;
-            numero_pelota += 1;
-        }else{
-            marcar_camino(arriba, derecha, pelota, '.');
-            return false;
-        }
+        h_utilizados[nueva_pelota.f][nueva_pelota.c] = true;
+        numero_pelota += 1;
         if(numero_pelota > num_pelotas) return true;
-    }else if(nueva_pelota.conteo_golpes == 0){
+        pelota_siguiente = pelotas[numero_pelota];
+    }
+    if(pelota_siguiente.conteo_golpes == 0){
         marcar_camino(arriba, derecha, pelota, '.');
         return false;
     }
-    if(backtracking('^', numero_pelota, pelotas[numero_pelota])) return true;
-    if(backtracking('>', numero_pelota, pelotas[numero_pelota])) return true;
-    if(backtracking('v', numero_pelota, pelotas[numero_pelota])) return true;
-    if(backtracking('<', numero_pelota, pelotas[numero_pelota])) return true;
-    h_utilizados[pelota.f][pelota.c] = false;
+    if(backtracking('^', numero_pelota, pelota_siguiente)) return true;
+    if(backtracking('>', numero_pelota, pelota_siguiente)) return true;
+    if(backtracking('v', numero_pelota, pelota_siguiente)) return true;
+    if(backtracking('<', numero_pelota, pelota_siguiente)) return true;
+    h_utilizados[nueva_pelota.f][nueva_pelota.c] = false;
     marcar_camino(arriba, derecha, pelota, '.');
     return false;
 }
