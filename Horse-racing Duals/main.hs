@@ -2,6 +2,11 @@ import System.IO ()
 import Control.Monad 
 import Data.List
 
+obtenerMenorDiferencia entrada = 
+    minimum $ map (\(x,y) -> abs $ x - y) (zip ordenado $ tail ordenado)
+    where
+        ordenado = sort $ map(\x -> read x:: Int) entrada
+
 main :: IO()
 main = do
     linea_entrada <- getLine
@@ -9,11 +14,6 @@ main = do
 
     lineas <- replicateM n getLine        
 
-    let pis= map (\x -> read x :: Int) lineas
-    let pis_ordenados = sort pis
-    let duplas = zip pis_ordenados $ tail pis_ordenados
-    let diferencia = map (\(x, y) -> abs $ x - y) duplas
-    let menor = minimum diferencia
-    print(menor)
+    print(obtenerMenorDiferencia lineas)
 
     return()
