@@ -5,7 +5,7 @@ def obtenerNodo(i, j, ax, ay):
     while i < alto and j < ancho and cuadricula[i][j] != '0':
         i += ay
         j += ax
-    return "-1 -1" if i >= alto or j >= ancho else str(i) + ' ' + str(j)
+    return "-1 -1" if i >= alto or j >= ancho else str(j) + ' ' + str(i)
 
     
 
