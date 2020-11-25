@@ -2,6 +2,10 @@
     "code-runner.executorMap":
                             {
                                 "python": "python3"
+                            },
+                            "files.associations": {
+                                "iostream": "cpp",
+                                "type_traits": "cpp"
                             }
 
 }
