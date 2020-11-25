@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <queue>
 using namespace std;
 struct Molecula{
     int a = 0, b = 1, c = 2, d = 3, e = 4;
@@ -13,8 +14,11 @@ struct Jugador{
 
 struct Muestra{
     int id, descargada_por, rank, gain, puntaje, a, b, c, d, e;
+    bool operator <(Muestra const & otro )const{
+        return puntaje < otro.puntaje;
+    }
 }muestras[1002];
-
+queue<Muestra> muestras_descargadas;
 string modulo_actual[2];
 int eta[2], puntaje[2];
 int moleculas_almacenadas[2][5];
@@ -51,11 +55,37 @@ void lectura(){
     }
 }
 
+void descargar_muestra(){
+    int i;
+    for(i = numero_muestras; i >= 0; i--) if (muestras[i].descargada_por == -1) break;
+    if (i < 0) cout<<"GOTO MOLECULES";
+    else{
+        muestras_descargadas.push(muestras[i]);
+        cout << "CONNECT "<< i;
+    }
+}
+
+bool limite_moleculas_almacenadas_alcanzado(){
+    int s = 0;
+    for(int i = 0; i <6; i++) s += moleculas_almacenadas[JUGADOR.j1][i];
+    return (s == 10) ? true : false;
+}
+
+void tomar_particula(){
+    
+}
+
 void analisis(){
     if(modulo_actual[JUGADOR.j1] == "DIAGNOSIS"){
-
+        if(muestras_descargadas.size()<3){
+            sort(muestras, muestras + numero_muestras);
+            descargar_muestra();
+        }else cout<< "GOTO MOLECULES";
     }else if(modulo_actual[JUGADOR.j1] == "MOLECULES"){
-
+        if(limite_moleculas_almacenadas_alcanzado()) cout << "GOTO LABORATORY";
+        else{
+            tomar_particula();
+        }
     }else if (modulo_actual[JUGADOR.j1] == "LABORATORY"){
 
     }
@@ -66,7 +96,7 @@ int main()
     inicializacion();
     while (true) {
         lectura();
-
+        analisis();
         cout << "GOTO DIAGNOSIS" << endl;
     }
 }
