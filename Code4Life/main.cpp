@@ -3,7 +3,9 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <map>
 using namespace std;
+
 struct Molecula{
     int a = 0, b = 1, c = 2, d = 3, e = 4;
 }MOLECULA;
@@ -18,7 +20,10 @@ struct Muestra{
         return puntaje < otro.puntaje;
     }
 }muestras[1002];
-queue<Muestra> muestras_descargadas;
+
+map <int, bool > muestras_procesadas;
+queue <Muestra> muestras_descargadas;
+queue <int> samples_descargados;
 string modulo_actual[2];
 int eta[2], puntaje[2];
 int moleculas_almacenadas[2][5];
@@ -39,6 +44,22 @@ void inicializacion(){
     }
 }
 
+void actualizar_datos_muestras_descargadas(){
+    int ids [3];
+    int i = -1;
+    while(!muestras_descargadas.empty()){
+        ids[++i] = muestras_descargadas.front().id; muestras_descargadas.pop();
+    }
+    int id_actual = 0;
+    for(int j = 0; j < numero_muestras; j++){
+        if (muestras[j].id == ids[id_actual]){
+            muestras_descargadas.push(muestras[j]);
+            id_actual ++;
+        }
+        if(id_actual > i) break;
+        if(j == numero_muestras - 1) j = -1;
+    }
+}
 
 void lectura(){
     for (int i = 0; i < 2; i++) {
@@ -52,17 +73,41 @@ void lectura(){
         cin >> muestras[i].id >> muestras[i].descargada_por >> muestras[i].rank >> muestras[i].gain 
                 >> muestras[i].puntaje >> muestras[i].a >> muestras[i].b >> muestras[i].c 
                 >> muestras[i].d >> muestras[i].e;
+        cerr << muestras[i].id <<'\n';
     }
+    actualizar_datos_muestras_descargadas();
+}
+
+
+bool en_muestras_descargadas(Muestra muestra){
+    Muestra m[3];
+    int i = -1;
+    while(!muestras_descargadas.empty()){
+        m[++i] = muestras_descargadas.front(); muestras_descargadas.pop();
+    }
+    for(int j = 0; j <= i; j++) muestras_descargadas.push(m[j]);
+    for(int j = 0; j <= i; j++) if (m[j].id == muestra.id) return true;
+    return false;
 }
 
 void descargar_muestra(){
     int i;
-    for(i = numero_muestras - 1; i >= 0; i--) if (muestras[i].descargada_por == -1) break;
-    if (i < 0) cout<<"GOTO MOLECULES";
-    else{
-        muestras_descargadas.push(muestras[i]);
-        cout << "CONNECT "<< muestras[i].id;
+    for(i = numero_muestras -1 ; i >= 0; i--){
+        cerr<< muestras[i].id <<'\n';
+        if (muestras[i].descargada_por == 0 and !muestras_procesadas[muestras[i].id] and
+        !en_muestras_descargadas(muestras[i])) {
+            muestras_procesadas[muestras[i].id] = true;
+            muestras_descargadas.push(muestras[i]);
+            cout << "CONNECT " << muestras[i].id;
+            return;
+        }else if (muestras[i].descargada_por == -1 and !muestras_procesadas[muestras[i].id]){
+            muestras_procesadas[muestras[i].id] = true;
+            muestras_descargadas.push(muestras[i]);
+            cout << "CONNECT "<< muestras[i].id;
+            return;
+        }
     }
+    cout<<"GOTO MOLECULES";
 }
 
 bool limite_moleculas_almacenadas_alcanzado(){
@@ -130,15 +175,23 @@ bool posible_procesar_muestra(Muestra m){
 void procesar_muestra(){
     if (posible_procesar_muestra(muestras_descargadas.front() )){
         Muestra m = muestras_descargadas.front(); muestras_descargadas.pop();
+        samples_descargados.pop();
         cout << "CONNECT " << m.id;
-    }else cout << "GOTO DIAGNOSIS";
+    }else cout << "GOTO SAMPLES";
 }
 
 void analisis(){
-    if (modulo_actual[JUGADOR.j1] == "START_POS") cout << "GOTO DIAGNOSIS";
-    else if(modulo_actual[JUGADOR.j1] == "DIAGNOSIS"){
+    if (modulo_actual[JUGADOR.j1] == "START_POS") cout << "GOTO SAMPLES";
+    else if(modulo_actual[JUGADOR.j1] == "SAMPLES"){
+        if (samples_descargados.size() < 3 ){
+            samples_descargados.push(2);
+            cout<< "CONNECT 2";
+        }else{
+            cout<< "GOTO DIAGNOSIS";
+        }
+    }else if(modulo_actual[JUGADOR.j1] == "DIAGNOSIS"){
         if(muestras_descargadas.size() < 3){
-            sort(muestras, muestras + numero_muestras);
+            sort(muestras, muestras + numero_muestras - 1);
             descargar_muestra();
         }else cout<< "GOTO MOLECULES";
     }else if(modulo_actual[JUGADOR.j1] == "MOLECULES"){
@@ -146,7 +199,7 @@ void analisis(){
         else if(limite_moleculas_almacenadas_alcanzado()) cout << "GOTO LABORATORY";
         else tomar_particula();
     }else if (modulo_actual[JUGADOR.j1] == "LABORATORY"){
-        if(muestras_descargadas.empty()) "GOTO DIAGNOSIS";
+        if(muestras_descargadas.empty()) "GOTO SAMPLES";
         procesar_muestra();
     }
     cout << '\n';
